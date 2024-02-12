@@ -11,14 +11,14 @@ namespace ItemsAndOrdersManagementSystem.Models
         [Required]
         public int id { get; set; }
 
-        [ForeignKey(nameof(ApplicationUser))]
+        [ForeignKey(nameof(User))]
         public string UserId { get; set; }
 
         [Timestamp]
         public byte[] Timestamp { get; set; }
 
         public ApplicationUser User { get; set; }
-        public IEnumerable<Item> Items { get; set; }
+        public IEnumerable<OrderItems> Items { get; set; }
 
     }
 }
