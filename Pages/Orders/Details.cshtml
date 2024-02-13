@@ -1,0 +1,38 @@
+﻿@page
+@model ItemsAndOrdersManagementSystem.Pages.Orders.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Order</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Order.Timestamp)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Order.Timestamp)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Order.User)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Order.User.Id)
+        </dd>
+    </dl>
+    <h3>Items</h3>
+    <ul>
+        @foreach (var item in Model.Order.Items)
+        {
+            <li>@item.Item.Name - @* Quantity: @item.Item.Price - *@ Price: @item.Item.Price</li>
+        }
+    </ul>
+</div>
+<div>
+    <a asp-page="./Edit" asp-route-id="@Model.Order.id">Edit</a> |
+    <a asp-page="./Index">Back to List</a>
+</div>

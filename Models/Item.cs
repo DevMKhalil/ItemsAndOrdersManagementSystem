@@ -9,8 +9,8 @@ namespace ItemsAndOrdersManagementSystem.Models
         [Key]
         [Required]
         public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
         [Column(TypeName = "decimal(7,4)")]
         public decimal Price { get; set; }
     }

@@ -12,13 +12,14 @@ namespace ItemsAndOrdersManagementSystem.Models
         public int id { get; set; }
 
         [ForeignKey(nameof(User))]
-        public string UserId { get; set; }
+        public string UserId { get; set; } = null!;
 
         [Timestamp]
         public byte[] Timestamp { get; set; }
+        public int MyProperty { get; set; }
 
         public ApplicationUser User { get; set; }
-        public IEnumerable<OrderItems> Items { get; set; }
+        public List<OrderItems> Items { get; set; } = new List<OrderItems>();
 
     }
 }
