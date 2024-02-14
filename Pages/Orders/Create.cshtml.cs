@@ -9,6 +9,7 @@ using ItemsAndOrdersManagementSystem.Data;
 using ItemsAndOrdersManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using ItemsAndOrdersManagementSystem.Common;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Orders
 {
@@ -17,7 +18,7 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
         private readonly ItemsAndOrdersManagementSystem.Data.AppDbContext _context;
         public List<SelectListItem> ItemList { get; set; } = new();
         [BindProperty]
-        public List<OrderItems> NewItemDetailList { get; set; } = new();
+        public List<int> NewItemDetailList { get; set; } = new();
         public CreateModel(ItemsAndOrdersManagementSystem.Data.AppDbContext context)
         {
             _context = context;
@@ -26,6 +27,7 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
         public async Task<IActionResult> OnGet()
         {
             ItemList = await _context.Items.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToListAsync();
+            
             return Page();
         }
 
@@ -34,12 +36,23 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
+            if (User == null)
+            {
+                ModelState.AddModelError(string.Empty, "User is not authenticated.");
+            }
+
+            if (NewItemDetailList == null || !NewItemDetailList.Any())
+            {
+                ModelState.AddModelError(string.Empty, "Items list is empty.");
+            }
             if (!ModelState.IsValid)
             {
+                ItemList = await _context.Items.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToListAsync();
                 return Page();
             }
+            Order = new Order();
             this.Order.UserId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            this.Order.Items.AddRange(NewItemDetailList);
+            this.Order.Items.AddRange(NewItemDetailList.Select(x => new OrderItems { ItemId = x}));
 
             _context.Orders.Add(Order);
             await _context.SaveChangesAsync();

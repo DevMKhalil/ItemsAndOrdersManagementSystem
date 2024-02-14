@@ -51,7 +51,7 @@
 
         function getNewItemDetailRowHtml(index) {
             return `
-                        <select name="NewItemDetailList[${index}].ItemId" class="form-control form-select">
+                        <select name="NewItemDetailList[${index}]" class="form-control form-select">
                                     <option selected disabled value="">--Items--</option>
                         @foreach (var item in Model.ItemList)
                         {
