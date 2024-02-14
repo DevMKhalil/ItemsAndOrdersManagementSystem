@@ -13,7 +13,7 @@ namespace ItemsAndOrdersManagementSystem.Models
         [ForeignKey(nameof(Item))]
         public int ItemId { get; set; }
 
-        public Order Order { get; set; }
-        public Item Item { get; set; }
+        public Order Order { get; set; } = null!;
+        public Item Item { get; set; } = null!;
     }
 }

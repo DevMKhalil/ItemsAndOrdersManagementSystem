@@ -22,6 +22,8 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
 
         [BindProperty]
         public Order Order { get; set; } = default!;
+        public IEnumerable<SelectListItem> ItemList { get; set; }
+        public List<OrderItems> NewItemDetailList { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -36,6 +38,7 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
                 return NotFound();
             }
             Order = order;
+            ItemList = await _context.Items.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToListAsync();
            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
             return Page();
         }

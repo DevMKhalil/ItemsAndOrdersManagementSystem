@@ -10,22 +10,23 @@
 <h4>Order</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4" id="itemDetailsContainer">
+    <div class="col-md-4" >
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Order.UserId" class="control-label"></label>
-                <select asp-for="Order.UserId" class ="form-control" asp-items="ViewBag.UserId"></select>
+                <label class="control-label">User Name : </label>
+                <span>@Model.User.Identity.Name</span>
             </div>
+
+            <div class="form-group" id="itemDetailsContainer">
+                <button type="button" id="addItemDetailButton" class="btn btn-primary col-md-4" style="margin-bottom: 10px;">Add Item Detail</button>
+            </div>
+            <br />
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
     </div>
-    <div class="col-md-8" id="itemDetailsContainer">
-
-    </div>
-    <button id="addItemDetailButton">Add Item Detail</button>
 </div>
 
 <div>
@@ -35,28 +36,28 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
-        // JavaScript logic to add new rows
         document.getElementById('addItemDetailButton').addEventListener('click', function () {
             addNewItemDetailRow();
         });
 
         function addNewItemDetailRow() {
             var container = document.getElementById('itemDetailsContainer');
-            var childLength = container.childNodes.length;
+            var childLength = container.getElementsByClassName('col-md-8').length;
             var newRow = document.createElement('div');
-            newRow.innerHTML = getNewItemDetailRowHtml(childLength); // You need a function to generate HTML for a new row
-            container.appendChild(newRow);
+            newRow.className = 'col-md-8';
+            newRow.innerHTML = getNewItemDetailRowHtml(childLength);
+            container.insertBefore(newRow, document.getElementById('addItemDetailButton'));
         }
 
         function getNewItemDetailRowHtml(index) {
-            // Define the HTML structure for a new row
-            // Customize this based on your item detail form fields
             return `
-                    <div class="item-detail-row">
-                                <input type="text" name="newItemDetails[${index}].PropertyName" placeholder="Property Name" />
-                        <!-- Add more input fields as needed -->
-                    </div>
-                `;
+                        <select name="NewItemDetailList[${index}].ItemId" class="form-control form-select">
+                                    <option selected disabled value="">--Items--</option>
+                        @foreach (var item in Model.ItemList)
+                        {
+                                                    <option value="@item.Value">@item.Text</option>
+                        }
+                        </select>`;
         }
     </script>
 }

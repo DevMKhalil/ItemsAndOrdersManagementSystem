@@ -7,25 +7,28 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ItemsAndOrdersManagementSystem.Data;
 using ItemsAndOrdersManagementSystem.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Orders
 {
     public class CreateModel : PageModelBase
     {
         private readonly ItemsAndOrdersManagementSystem.Data.AppDbContext _context;
-
+        public List<SelectListItem> ItemList { get; set; } = new();
+        [BindProperty]
+        public List<OrderItems> NewItemDetailList { get; set; } = new();
         public CreateModel(ItemsAndOrdersManagementSystem.Data.AppDbContext context)
         {
             _context = context;
         }
 
-        public IActionResult OnGet()
+        public async Task<IActionResult> OnGet()
         {
-        ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+            ItemList = await _context.Items.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToListAsync();
             return Page();
         }
 
-        [BindProperty]
         public Order Order { get; set; } = default!;
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
@@ -35,6 +38,8 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
             {
                 return Page();
             }
+            this.Order.UserId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            this.Order.Items.AddRange(NewItemDetailList);
 
             _context.Orders.Add(Order);
             await _context.SaveChangesAsync();

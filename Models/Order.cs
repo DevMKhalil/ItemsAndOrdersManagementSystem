@@ -16,7 +16,6 @@ namespace ItemsAndOrdersManagementSystem.Models
 
         [Timestamp]
         public byte[] Timestamp { get; set; }
-        public int MyProperty { get; set; }
 
         public ApplicationUser User { get; set; }
         public List<OrderItems> Items { get; set; } = new List<OrderItems>();

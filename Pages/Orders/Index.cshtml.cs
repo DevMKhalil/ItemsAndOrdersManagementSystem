@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ItemsAndOrdersManagementSystem.Data;
 using ItemsAndOrdersManagementSystem.Models;
+using System.Security.Claims;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Orders
 {
@@ -23,7 +24,9 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
 
         public async Task OnGetAsync()
         {
-            Order = await _context.Orders.AsTracking()
+            Order = await _context.Orders
+                .Where(x => x.UserId == this.User.FindFirstValue(ClaimTypes.NameIdentifier))
+                .AsTracking()
                 .Include(o => o.User).ToListAsync();
         }
     }
