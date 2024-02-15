@@ -8,22 +8,21 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ItemsAndOrdersManagementSystem.Data;
 using ItemsAndOrdersManagementSystem.Models;
+using NuGet.Packaging;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Orders
 {
     public class EditModel : PageModelBase
     {
         private readonly ItemsAndOrdersManagementSystem.Data.AppDbContext _context;
-
         public EditModel(ItemsAndOrdersManagementSystem.Data.AppDbContext context)
         {
             _context = context;
         }
 
         [BindProperty]
-        public Order Order { get; set; } = default!;
-        public IEnumerable<SelectListItem> ItemList { get; set; }
-        public List<OrderItems> NewItemDetailList { get; set; } = new();
+        public Order Order { get; set; }
+        public List<SelectListItem> ItemList { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -32,14 +31,20 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
                 return NotFound();
             }
 
-            var order =  await _context.Orders.AsSplitQuery().Include(x => x.Items).ThenInclude(x => x.Item).FirstOrDefaultAsync(m => m.id == id);
-            if (order == null)
+            Order =  await _context.Orders
+                .AsSplitQuery()
+                .Include(x => x.Items)
+                .FirstOrDefaultAsync(m => m.id == id);
+
+            if (Order is null)
             {
                 return NotFound();
             }
-            Order = order;
-            ItemList = await _context.Items.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToListAsync();
-           ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+
+            ItemList = await _context.Items
+                .Select(x => new SelectListItem(x.Name, x.Id.ToString()))
+                .ToListAsync();
+
             return Page();
         }
 
@@ -47,12 +52,37 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
         // For more details, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            if (User == null)
+            {
+                ModelState.AddModelError(string.Empty, "User is not authenticated.");
+            }
+
+            if (!Order.Items.Any())
+            {
+                ModelState.AddModelError(string.Empty, "Items list is empty.");
+            }
             if (!ModelState.IsValid)
             {
+                ItemList = await _context.Items
+                .Select(x => new SelectListItem(x.Name, x.Id.ToString()))
+                .ToListAsync();
+
                 return Page();
             }
 
-            _context.Attach(Order).State = EntityState.Modified;
+            var existingOrder = await _context.Orders
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(m => m.id == Order.id);
+
+            if (existingOrder == null)
+            {
+                return NotFound();
+            }
+
+            existingOrder.Items.Clear();
+            existingOrder.Items.AddRange(Order.Items);
+
+            _context.Attach(existingOrder).State = EntityState.Modified;
 
             try
             {

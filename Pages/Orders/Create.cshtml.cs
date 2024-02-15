@@ -9,7 +9,6 @@ using ItemsAndOrdersManagementSystem.Data;
 using ItemsAndOrdersManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using ItemsAndOrdersManagementSystem.Common;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Orders
 {
@@ -31,6 +30,7 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
             return Page();
         }
 
+        [BindProperty]
         public Order Order { get; set; } = default!;
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
@@ -41,7 +41,7 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
                 ModelState.AddModelError(string.Empty, "User is not authenticated.");
             }
 
-            if (NewItemDetailList == null || !NewItemDetailList.Any())
+            if (!Order.Items.Any())
             {
                 ModelState.AddModelError(string.Empty, "Items list is empty.");
             }
@@ -50,9 +50,8 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
                 ItemList = await _context.Items.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToListAsync();
                 return Page();
             }
-            Order = new Order();
+
             this.Order.UserId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            this.Order.Items.AddRange(NewItemDetailList.Select(x => new OrderItems { ItemId = x}));
 
             _context.Orders.Add(Order);
             await _context.SaveChangesAsync();

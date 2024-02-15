@@ -47,17 +47,43 @@
             newRow.className = 'col-md-8';
             newRow.innerHTML = getNewItemDetailRowHtml(childLength);
             container.insertBefore(newRow, document.getElementById('addItemDetailButton'));
+            updateIndexes();
+        }
+
+        function removeItemDetailRow(button) {
+            var rowToRemove = button.closest('.col-md-8');
+            rowToRemove.remove();
+            updateIndexes();
+        }
+
+        function updateIndexes() {
+            var rows = document.querySelectorAll('.col-md-8');
+            rows.forEach(function (row, index) {
+                var selects = row.querySelectorAll('select');
+                selects.forEach(function (select) {
+                    var name = select.getAttribute('name');
+                    var newName = name.replace(/\[\d+\]/, '[' + index + ']');
+                    select.setAttribute('name', newName);
+                });
+            });
         }
 
         function getNewItemDetailRowHtml(index) {
             return `
-                        <select name="NewItemDetailList[${index}]" class="form-control form-select">
-                                    <option selected disabled value="">--Items--</option>
-                        @foreach (var item in Model.ItemList)
-                        {
-                                                    <option value="@item.Value">@item.Text</option>
-                        }
-                        </select>`;
+                    <div class="row">
+                        <div class="col-md-6">
+                                    <select name="Order.Items[${index}].ItemId" id="Order_Items_${index}__ItemId" class="form-control form-select">
+                                <option selected disabled value="">--Items--</option>
+        @foreach (var item in Model.ItemList)
+        {
+                                        <option value="@item.Value">@item.Text</option>
+        }
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" onclick="removeItemDetailRow(this)" class="btn btn-danger">Delete</button>
+                        </div>
+                    </div>`;
         }
     </script>
 }

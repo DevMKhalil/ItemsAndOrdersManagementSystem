@@ -14,25 +14,35 @@
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Order.id" />
+@*             <input type="hidden" asp-for="Order.UserId" />
+            <input type="hidden" asp-for="Order.Items" /> *@
             <div class="form-group">
-                <label asp-for="Order.UserId" class="control-label"></label>
-                <select asp-for="Order.UserId" class="form-control" asp-items="ViewBag.UserId"></select>
-                <span asp-validation-for="Order.UserId" class="text-danger"></span>
+                <label class="control-label">User Name:</label>
+                <span>@Model.User.Identity.Name</span>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="itemDetailsContainer">
                 <label>Items</label>
-                @for (int i = 0; i < Model.Order.Items.Count(); i++)
+                @for (var index = 0; index < Model.Order.Items.Count; index++)
                 {
-                    <div>
-                        <label>Product Name</label>
-                        <input asp-for="Order.Items[i].Item.Name" class="form-control" />
-@*                         <label>Quantity</label>
-                        <input asp-for="Order.Items[i].Quantity" class="form-control" /> *@
-                        <label>Price</label>
-                        <input asp-for="Order.Items[i].Item.Price" class="form-control" />
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <select asp-for="Order.Items[index].ItemId" class="form-control form-select" asp-items="Model.ItemList">
+                                    <option disabled value="">--Items--</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-danger" onclick="removeItemDetailRow(this)">Delete</button>
+                            </div>
+                        </div>
                     </div>
                 }
+                <button type="button" id="addItemDetailButton" class="btn btn-primary col-md-4" style="margin-bottom: 10px;">Add Item Detail</button>
             </div>
+@*             <div class="form-group" id="newItemDetailsContainer">
+                <button type="button" id="addItemDetailButton" class="btn btn-primary col-md-4" style="margin-bottom: 10px;">Add Item Detail</button>
+            </div> *@
+            <br />
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
@@ -46,4 +56,60 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.getElementById('addItemDetailButton').addEventListener('click', function () {
+            addNewItemDetailRow();
+        });
+
+        function addNewItemDetailRow() {
+            //var container = document.getElementById('newItemDetailsContainer');
+            var container = document.getElementById('itemDetailsContainer');
+            var childLength = container.getElementsByClassName('col-md-8').length;
+            var newRow = document.createElement('div');
+            newRow.className = 'col-md-8';
+            newRow.tagName = 'newItem';
+            newRow.innerHTML = getNewItemDetailRowHtml(childLength);
+            container.insertBefore(newRow, document.getElementById('addItemDetailButton'));
+            updateIndexes();
+        }
+
+        function removeItemDetailRow(button) {
+            var rowToRemove = button.closest('.col-md-8');
+            rowToRemove.remove();
+            updateIndexes();
+        }
+
+        function updateIndexes() {
+            //var container = document.getElementById('newItemDetailsContainer');
+            var container = document.getElementById('itemDetailsContainer');
+            var rows = container.querySelectorAll('.col-md-8');
+            //var rows = document.querySelectorAll('.col-md-8');
+            rows.forEach(function (row, index) {
+                var selects = row.querySelectorAll('select');
+                selects.forEach(function (select) {
+                    var name = select.getAttribute('name');
+                    var newName = name.replace(/\[\d+\]/, '[' + index + ']');
+                    select.setAttribute('name', newName);
+                });
+            });
+        }
+
+        function getNewItemDetailRowHtml(index) {
+            return `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <select name="Order.Items[${index}].ItemId" id="Order_Items_${index}__ItemId" class="form-control form-select">
+                            <option selected disabled value="">--Items--</option>
+        @foreach (var item in Model.ItemList)
+        {
+                                        <option value="@item.Value">@item.Text</option>
+        }
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" onclick="removeItemDetailRow(this)" class="btn btn-danger">Delete</button>
+                        </div>
+                    </div>`;
+        }
+    </script>
 }
