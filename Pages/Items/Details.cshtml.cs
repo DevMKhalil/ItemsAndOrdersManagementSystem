@@ -7,36 +7,36 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ItemsAndOrdersManagementSystem.Data;
 using ItemsAndOrdersManagementSystem.Models;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Dtos;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Queries.GetById;
+using MediatR;
+using ItemsAndOrdersManagementSystem.Common.Helper;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Items
 {
     public class DetailsModel : PageModelBase
     {
-        private readonly ItemsAndOrdersManagementSystem.Data.AppDbContext _context;
+        private readonly IMediator _mediator;
 
-        public DetailsModel(ItemsAndOrdersManagementSystem.Data.AppDbContext context)
+        public DetailsModel(IMediator mediator)
         {
-            _context = context;
+            _mediator = mediator;
         }
 
-        public Item Item { get; set; } = default!;
+        public ItemDto Item { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null)
-            {
+            if (id is null)
                 return NotFound();
-            }
 
-            var item = await _context.Items.FirstOrDefaultAsync(m => m.Id == id);
-            if (item == null)
-            {
-                return NotFound();
-            }
+            var res = await _mediator.Send(new GetItemByIdQuery { ItemId = id.Value });
+
+            if (res.IsFailure)
+                ModelState.AddErrors(res.Error);
             else
-            {
-                Item = item;
-            }
+                Item = res.Value;
+
             return Page();
         }
     }

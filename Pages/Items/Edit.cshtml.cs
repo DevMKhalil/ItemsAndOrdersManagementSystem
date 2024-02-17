@@ -8,34 +8,45 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ItemsAndOrdersManagementSystem.Data;
 using ItemsAndOrdersManagementSystem.Models;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Commands.UpdateItem;
+using ItemsAndOrdersManagementSystem.Common.Helper;
+using MediatR;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Dtos;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Commands.CreateItem;
+using AutoMapper;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Queries.GetById;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Items
 {
     public class EditModel : PageModelBase
     {
-        private readonly ItemsAndOrdersManagementSystem.Data.AppDbContext _context;
-
-        public EditModel(ItemsAndOrdersManagementSystem.Data.AppDbContext context)
+        private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
+        public EditModel(IMediator mediator, IMapper mapper)
         {
-            _context = context;
+            _mediator = mediator;
+            _mapper = mapper;
         }
 
         [BindProperty]
-        public Item Item { get; set; } = default!;
+        public ItemDto Item { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null)
-            {
+            if (id is null)
                 return NotFound();
-            }
 
-            var item =  await _context.Items.FirstOrDefaultAsync(m => m.Id == id);
-            if (item == null)
-            {
-                return NotFound();
-            }
-            Item = item;
+            var res = await _mediator.Send(new GetItemByIdQuery { ItemId = id.Value});
+
+            if (res.IsFailure)
+                ModelState.AddErrors(res.Error);
+
+            if (!ModelState.IsValid)
+                return Page();
+
+            this.Item = res.Value;
+
             return Page();
         }
 
@@ -44,34 +55,19 @@ namespace ItemsAndOrdersManagementSystem.Pages.Items
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
-            {
                 return Page();
-            }
 
-            _context.Attach(Item).State = EntityState.Modified;
+            var command = _mapper.Map<UpdateItemCommand>(Item);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ItemExists(Item.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var res = await _mediator.Send(command);
+
+            if (res.IsFailure)
+                ModelState.AddErrors(res.Error);
+
+            if (!ModelState.IsValid)
+                return Page();
 
             return RedirectToPage("./Index");
-        }
-
-        private bool ItemExists(int id)
-        {
-            return _context.Items.Any(e => e.Id == id);
         }
     }
 }

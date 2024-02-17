@@ -4,6 +4,8 @@ using ItemsAndOrdersManagementSystem.Data;
 using Microsoft.Extensions.Configuration;
 using ItemsAndOrdersManagementSystem.Models;
 using System.Data.Common;
+using ItemsAndOrdersManagementSystem.Aplication;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,10 @@ builder.Configuration
 builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddTransient<IAppDbContext, AppDbContext>();
+builder.Services.AddMediatR(x => x.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => {
     options.Password.RequireDigit = false;
     options.Password.RequireLowercase = false;
@@ -21,7 +27,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => {
     options.Password.RequiredLength = 3;
     options.Password.RequiredUniqueChars = 0;
 
-    options.User.RequireUniqueEmail = false;
+    options.User.RequireUniqueEmail = true;
     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@";
 
     options.Lockout.AllowedForNewUsers = false;
@@ -32,10 +38,6 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => {
     options.SignIn.RequireConfirmedPhoneNumber = false;
 })
     .AddEntityFrameworkStores<AppDbContext>();
-
-//builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-//    .AddEntityFrameworkStores<AppDbContext>()
-//    .AddDefaultTokenProviders();
 
 // Add services to the container.
 builder.Services.AddRazorPages();

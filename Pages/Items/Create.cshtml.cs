@@ -8,16 +8,25 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using ItemsAndOrdersManagementSystem.Data;
 using ItemsAndOrdersManagementSystem.Models;
 using Microsoft.AspNetCore.Identity;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Commands.CreateItem;
+using MediatR;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using ItemsAndOrdersManagementSystem.Common.Helper;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Dtos;
+using Azure.Core;
+using AutoMapper;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Items
 {
     public class CreateModel : PageModelBase
     {
-        private readonly ItemsAndOrdersManagementSystem.Data.AppDbContext _context;
+        private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
 
-        public CreateModel(ItemsAndOrdersManagementSystem.Data.AppDbContext context)
+        public CreateModel(IMediator mediator, IMapper mapper)
         {
-            _context = context;
+            _mediator = mediator;
+            _mapper = mapper;
         }
 
         public IActionResult OnGet()
@@ -26,18 +35,23 @@ namespace ItemsAndOrdersManagementSystem.Pages.Items
         }
 
         [BindProperty]
-        public Item Item { get; set; } = default!;
+        public ItemDto Item { get; set; } = default!;
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
-            {
                 return Page();
-            }
 
-            _context.Items.Add(Item);
-            await _context.SaveChangesAsync();
+            var command = _mapper.Map<CreateItemCommand>(Item);
+
+            var res = await _mediator.Send(command);
+
+            if (res.IsFailure)
+                ModelState.AddErrors(res.Error);
+
+            if (!ModelState.IsValid)
+                return Page();
 
             return RedirectToPage("./Index");
         }
