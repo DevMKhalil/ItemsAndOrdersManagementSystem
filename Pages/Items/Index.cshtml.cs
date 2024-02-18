@@ -28,7 +28,6 @@ namespace ItemsAndOrdersManagementSystem.Pages.Items
         public async Task OnGetAsync()
         {
             ItemList = await _mediator.Send(new GetItemListQuery { });
-            //Item = await _context.Items.ToListAsync();
         }
     }
 }

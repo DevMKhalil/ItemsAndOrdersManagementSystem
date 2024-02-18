@@ -14,6 +14,13 @@
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
+@*                 <label asp-for="Order.UserId" class="control-label"></label>
+                <select asp-for="Order.UserId" class="form-control" disabled asp-items="Model.UserList">
+                    @foreach (var user in Model.UserList)
+                    {
+                        <option value="@user.Value" @(user.Value == Model.User.Identity.Name ? "selected" : "")>@user.Text</option>
+                    }
+                </select> *@
                 <label class="control-label">User Name : </label>
                 <span>@Model.User.Identity.Name</span>
             </div>
@@ -72,7 +79,7 @@
             return `
                     <div class="row">
                         <div class="col-md-6">
-                                    <select name="Order.Items[${index}].ItemId" id="Order_Items_${index}__ItemId" class="form-control form-select">
+                                <select name="Order.OrderItemsDtoList[${index}]" id="Order_OrderItemsDtoList_${index}" class="form-control form-select">
                                 <option selected disabled value="">--Items--</option>
         @foreach (var item in Model.ItemList)
         {

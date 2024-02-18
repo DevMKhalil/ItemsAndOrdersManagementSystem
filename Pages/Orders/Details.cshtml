@@ -18,17 +18,19 @@
             @Html.DisplayFor(model => model.Order.Timestamp)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Order.User)
+            @Html.DisplayNameFor(model => model.Order.UserId)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Order.User.Id)
+            @Html.DisplayFor(model => model.Order.UserId)
         </dd>
     </dl>
     <h3>Items</h3>
     <ul>
-        @foreach (var item in Model.Order.Items)
+        @for (var index = 0; index < Model.Order.OrderItemsDtoList.Count; index++)
         {
-            <li>@item.Item.Name - @* Quantity: @item.Item.Price - *@ Price: @item.Item.Price</li>
+            <select asp-for="Order.OrderItemsDtoList[index]" class="form-control form-select" disabled asp-items="Model.ItemList">
+                <option disabled value="">--Items--</option>
+            </select>
         }
     </ul>
 </div>

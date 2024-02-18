@@ -7,55 +7,50 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ItemsAndOrdersManagementSystem.Data;
 using ItemsAndOrdersManagementSystem.Models;
+using ItemsAndOrdersManagementSystem.Aplication.Orders.Queries.GetById;
+using ItemsAndOrdersManagementSystem.Common.Helper;
+using MediatR;
+using ItemsAndOrdersManagementSystem.Aplication.Orders.Dtos;
+using ItemsAndOrdersManagementSystem.Aplication.Orders.Commands.DeleteCommand;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Orders
 {
     public class DeleteModel : PageModelBase
     {
-        private readonly ItemsAndOrdersManagementSystem.Data.AppDbContext _context;
+        private readonly IMediator _mediator;
 
-        public DeleteModel(ItemsAndOrdersManagementSystem.Data.AppDbContext context)
+        public DeleteModel(IMediator mediator)
         {
-            _context = context;
+            _mediator = mediator;
         }
 
         [BindProperty]
-        public Order Order { get; set; } = default!;
+        public OrderDto Order { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null)
-            {
+            if (id is null)
                 return NotFound();
-            }
 
-            var order = await _context.Orders.Include(x => x.Items).FirstOrDefaultAsync(m => m.id == id);
+            var res = await _mediator.Send(new GetOrderByIdQuery { Id = id.Value });
 
-            if (order == null)
-            {
-                return NotFound();
-            }
+            if (res.IsFailure)
+                ModelState.AddErrors(res.Error);
             else
-            {
-                Order = order;
-            }
+                Order = res.Value;
+
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(int? id)
         {
-            if (id == null)
-            {
+            if (id is null)
                 return NotFound();
-            }
 
-            var order = await _context.Orders.FindAsync(id);
-            if (order != null)
-            {
-                Order = order;
-                _context.Orders.Remove(Order);
-                await _context.SaveChangesAsync();
-            }
+            var res = await _mediator.Send(new DeleteOrderCommand { Id = id.Value });
+
+            if (res.IsFailure)
+                ModelState.AddErrors(res.Error);
 
             return RedirectToPage("./Index");
         }

@@ -112,4 +112,22 @@
   <data name="ItemRelatedToOrders" xml:space="preserve">
     <value>Item Related To Orders</value>
   </data>
+  <data name="userIsNotAuthenticated" xml:space="preserve">
+    <value>user Is Not Authenticated</value>
+  </data>
+  <data name="OrderItemNotFound" xml:space="preserve">
+    <value>Order Item Not Found</value>
+  </data>
+  <data name="OrderNotFound" xml:space="preserve">
+    <value>Order Not Found</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>User Not Found</value>
+  </data>
+  <data name="ItemsListIsEmpty" xml:space="preserve">
+    <value>Items list is empty</value>
+  </data>
+  <data name="TheItemIsDublicated" xml:space="preserve">
+    <value>The Item Is Dublicated</value>
+  </data>
 </root>

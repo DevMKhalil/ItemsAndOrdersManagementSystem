@@ -9,41 +9,47 @@ using Microsoft.EntityFrameworkCore;
 using ItemsAndOrdersManagementSystem.Data;
 using ItemsAndOrdersManagementSystem.Models;
 using NuGet.Packaging;
+using AutoMapper;
+using MediatR;
+using ItemsAndOrdersManagementSystem.Aplication.Orders.Dtos;
+using ItemsAndOrdersManagementSystem.Aplication.Orders.Queries.GetById;
+using ItemsAndOrdersManagementSystem.Common.Helper;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Queries.GetList;
+using ItemsAndOrdersManagementSystem.Aplication.Orders.Commands.CreateOrder;
+using ItemsAndOrdersManagementSystem.Aplication.Orders.Commands.UpdateOrder;
+using System.Security.Claims;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Orders
 {
     public class EditModel : PageModelBase
     {
-        private readonly ItemsAndOrdersManagementSystem.Data.AppDbContext _context;
-        public EditModel(ItemsAndOrdersManagementSystem.Data.AppDbContext context)
+        private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
+        public EditModel(IMediator mediator, IMapper mapper)
         {
-            _context = context;
+            _mediator = mediator;
+            _mapper = mapper;
         }
 
         [BindProperty]
-        public Order Order { get; set; }
+        public OrderDto Order { get; set; }
         public List<SelectListItem> ItemList { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null)
+            if (id is null)
             {
                 return NotFound();
             }
 
-            Order =  await _context.Orders
-                .AsSplitQuery()
-                .Include(x => x.Items)
-                .FirstOrDefaultAsync(m => m.id == id);
+            var res = await _mediator.Send(new GetOrderByIdQuery { Id = id.Value });
 
-            if (Order is null)
-            {
-                return NotFound();
-            }
+            if (res.IsFailure)
+                ModelState.AddErrors(res.Error);
+            else
+                Order = res.Value;
 
-            ItemList = await _context.Items
-                .Select(x => new SelectListItem(x.Name, x.Id.ToString()))
-                .ToListAsync();
+            await GetItemList();
 
             return Page();
         }
@@ -52,60 +58,34 @@ namespace ItemsAndOrdersManagementSystem.Pages.Orders
         // For more details, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
-            if (User == null)
-            {
-                ModelState.AddModelError(string.Empty, "User is not authenticated.");
-            }
 
-            if (!Order.Items.Any())
-            {
-                ModelState.AddModelError(string.Empty, "Items list is empty.");
-            }
+            var orderDto = _mapper.Map<UpdateOrderCommand>(Order);
+
+            orderDto.UserId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var res = await _mediator.Send(orderDto);
+
+            ModelState.Clear();
+
+            if (res.IsFailure)
+                ModelState.AddErrors(res.Error);
+
             if (!ModelState.IsValid)
             {
-                ItemList = await _context.Items
-                .Select(x => new SelectListItem(x.Name, x.Id.ToString()))
-                .ToListAsync();
-
+                await GetItemList();
                 return Page();
-            }
-
-            var existingOrder = await _context.Orders
-                .Include(o => o.Items)
-                .FirstOrDefaultAsync(m => m.id == Order.id);
-
-            if (existingOrder == null)
-            {
-                return NotFound();
-            }
-
-            existingOrder.Items.Clear();
-            existingOrder.Items.AddRange(Order.Items);
-
-            _context.Attach(existingOrder).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!OrderExists(Order.id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
             }
 
             return RedirectToPage("./Index");
         }
 
-        private bool OrderExists(int id)
+        private async Task GetItemList()
         {
-            return _context.Orders.Any(e => e.id == id);
+            var items = await _mediator.Send(new GetItemListQuery { });
+
+            ItemList = items
+                        .Select(x => new SelectListItem(x.Name, x.Id.ToString()))
+                        .ToList();
         }
     }
 }

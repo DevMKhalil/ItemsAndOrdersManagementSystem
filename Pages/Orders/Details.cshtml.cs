@@ -7,36 +7,46 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ItemsAndOrdersManagementSystem.Data;
 using ItemsAndOrdersManagementSystem.Models;
+using MediatR;
+using ItemsAndOrdersManagementSystem.Aplication.Orders.Dtos;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Queries.GetById;
+using ItemsAndOrdersManagementSystem.Common.Helper;
+using ItemsAndOrdersManagementSystem.Aplication.Orders.Queries.GetById;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Queries.GetList;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Orders
 {
     public class DetailsModel : PageModelBase
     {
-        private readonly ItemsAndOrdersManagementSystem.Data.AppDbContext _context;
+        private readonly IMediator _mediator;
 
-        public DetailsModel(ItemsAndOrdersManagementSystem.Data.AppDbContext context)
+        public DetailsModel(IMediator mediator)
         {
-            _context = context;
+            _mediator = mediator;
         }
 
-        public Order Order { get; set; } = default!;
+        public OrderDto Order { get; set; } = default!;
+        public List<SelectListItem> ItemList { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null)
-            {
+            if (id is null)
                 return NotFound();
-            }
 
-            var order = await _context.Orders.AsTracking().AsSplitQuery().Include(x => x.Items).ThenInclude(x => x.Item).FirstOrDefaultAsync(m => m.id == id);
-            if (order == null)
-            {
-                return NotFound();
-            }
+            var res = await _mediator.Send(new GetOrderByIdQuery { Id = id.Value });
+
+            if (res.IsFailure)
+                ModelState.AddErrors(res.Error);
             else
-            {
-                Order = order;
-            }
+                Order = res.Value;
+
+            var items = await _mediator.Send(new GetItemListQuery { });
+
+            ItemList = items
+                        .Select(x => new SelectListItem(x.Name, x.Id.ToString()))
+                        .ToList();
+
             return Page();
         }
     }

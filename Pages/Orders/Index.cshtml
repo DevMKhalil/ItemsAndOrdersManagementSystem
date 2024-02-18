@@ -14,22 +14,22 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Order[0].Timestamp)
+                @Html.DisplayNameFor(model => model.OrderList[0].Timestamp)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Order[0].User)
+                @Html.DisplayNameFor(model => model.OrderList[0].UserName)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Order) {
+@foreach (var item in Model.OrderList) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Timestamp)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.User.UserName)
+                @Html.DisplayFor(modelItem => item.UserName)
             </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.id">Edit</a> |

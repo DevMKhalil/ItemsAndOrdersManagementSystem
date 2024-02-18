@@ -10,6 +10,10 @@ namespace ItemsAndOrdersManagementSystem.Models
 {
     public class Item
     {
+        private Item()
+        {
+            
+        }
         [Key]
         [Required]
         public int Id { get; private set; }

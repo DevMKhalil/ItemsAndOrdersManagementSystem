@@ -8,6 +8,7 @@ namespace ItemsAndOrdersManagementSystem.Aplication
     {
         public DbSet<Order> Orders { get; set; }
         public DbSet<Item> Items { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         Task<Result> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
     }

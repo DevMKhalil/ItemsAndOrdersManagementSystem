@@ -9,54 +9,83 @@ using ItemsAndOrdersManagementSystem.Data;
 using ItemsAndOrdersManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using ItemsAndOrdersManagementSystem.Aplication.Orders.Dtos;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Queries.GetList;
+using MediatR;
+using ItemsAndOrdersManagementSystem.Aplication.Orders.Queries.GetById;
+using ItemsAndOrdersManagementSystem.Common.Helper;
+using AutoMapper;
+using ItemsAndOrdersManagementSystem.Aplication.Orders.Commands.CreateOrder;
+using ItemsAndOrdersManagementSystem.Aplication.Accounts.Queries.GetList;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Orders
 {
     public class CreateModel : PageModelBase
     {
-        private readonly ItemsAndOrdersManagementSystem.Data.AppDbContext _context;
+        private readonly IMediator _mediator;
+        private readonly IMapper _mapper;
+
         public List<SelectListItem> ItemList { get; set; } = new();
+        public List<SelectListItem> UserList { get; set; } = new();
         [BindProperty]
         public List<int> NewItemDetailList { get; set; } = new();
-        public CreateModel(ItemsAndOrdersManagementSystem.Data.AppDbContext context)
+        public CreateModel(IMediator mediator, IMapper mapper)
         {
-            _context = context;
+            _mediator = mediator;
+            _mapper = mapper;
         }
 
         public async Task<IActionResult> OnGet()
         {
-            ItemList = await _context.Items.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToListAsync();
-            
+            await GetItemList();
+            await GetUserList();
+
             return Page();
         }
 
         [BindProperty]
-        public Order Order { get; set; } = default!;
+        public OrderDto Order { get; set; } = default!;
 
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
-            if (User == null)
-            {
-                ModelState.AddModelError(string.Empty, "User is not authenticated.");
-            }
+            var orderDto = _mapper.Map<CreateOrderCommand>(Order);
 
-            if (!Order.Items.Any())
-            {
-                ModelState.AddModelError(string.Empty, "Items list is empty.");
-            }
+            orderDto.UserId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var res = await _mediator.Send(orderDto);
+
+            ModelState.Clear();
+
+            if (res.IsFailure)
+                ModelState.AddErrors(res.Error);
+
             if (!ModelState.IsValid)
             {
-                ItemList = await _context.Items.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToListAsync();
+                await GetItemList();
+                await GetUserList();
                 return Page();
             }
 
-            this.Order.UserId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            _context.Orders.Add(Order);
-            await _context.SaveChangesAsync();
-
             return RedirectToPage("./Index");
+        }
+
+        private async Task GetItemList()
+        {
+            var items = await _mediator.Send(new GetItemListQuery { });
+
+            ItemList = items
+                        .Select(x => new SelectListItem(x.Name, x.Id.ToString()))
+                        .ToList();
+        }
+
+        private async Task GetUserList()
+        {
+            var users = await _mediator.Send(new GetUserListQuery { });
+
+            UserList = users
+                        .Select(x => new SelectListItem(x.UserName, x.Id.ToString()))
+                        .ToList();
         }
     }
 }

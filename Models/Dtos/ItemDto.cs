@@ -7,7 +7,7 @@ using System.Diagnostics.Metrics;
 
 namespace ItemsAndOrdersManagementSystem.Models.Dtos
 {
-    public record ItemDto() : IMapFrom<CreateItemCommand>, IMapFrom<UpdateItemCommand>
+    public record ItemDto : IMapFrom<CreateItemCommand>, IMapFrom<UpdateItemCommand>
     {
         public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;

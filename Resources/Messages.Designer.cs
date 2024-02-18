@@ -104,5 +104,59 @@ namespace ItemsAndOrdersManagementSystem.Resources {
                 return ResourceManager.GetString("ItemRelatedToOrders", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Items list is empty.
+        /// </summary>
+        public static string ItemsListIsEmpty {
+            get {
+                return ResourceManager.GetString("ItemsListIsEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Order Item Not Found.
+        /// </summary>
+        public static string OrderItemNotFound {
+            get {
+                return ResourceManager.GetString("OrderItemNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Order Not Found.
+        /// </summary>
+        public static string OrderNotFound {
+            get {
+                return ResourceManager.GetString("OrderNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The Item Is Dublicated.
+        /// </summary>
+        public static string TheItemIsDublicated {
+            get {
+                return ResourceManager.GetString("TheItemIsDublicated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to user Is Not Authenticated.
+        /// </summary>
+        public static string userIsNotAuthenticated {
+            get {
+                return ResourceManager.GetString("userIsNotAuthenticated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User Not Found.
+        /// </summary>
+        public static string UserNotFound {
+            get {
+                return ResourceManager.GetString("UserNotFound", resourceCulture);
+            }
+        }
     }
 }
