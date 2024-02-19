@@ -9,13 +9,21 @@ using System.Threading.Tasks;
 
 namespace ItemsAndOrdersManagementSystem.Tests
 {
-    public class Items_Tests
+    [Collection("TestCollection")]
+    public class Items_Tests : IClassFixture<TestFixture>
     {
+        private readonly TestFixture _testFixture;
+
+        public Items_Tests(TestFixture testFixture)
+        {
+            _testFixture = testFixture;
+        }
+
         [Fact]
         public async Task Handel_Should_ReturnSuccessResult_WhenCreateItem()
         {
-            var mapper = Common.GetMapper();
-            var context = Common.GetApplicationDbContext();
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
 
             // Arrange
             var createItemCommand = new CreateItemCommand { Name = "test" ,Description = "test desc", Price = 1};
@@ -32,8 +40,8 @@ namespace ItemsAndOrdersManagementSystem.Tests
         [Fact]
         public async Task Handel_Should_ReturnFailResult_WhenNameIsNull()
         {
-            var mapper = Common.GetMapper();
-            var context = Common.GetApplicationDbContext();
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
 
             // Arrange
             var createItemCommand = new CreateItemCommand { Name = null, Description = "test desc", Price = 1 };
@@ -50,8 +58,8 @@ namespace ItemsAndOrdersManagementSystem.Tests
         [Fact]
         public async Task Handel_Should_ReturnFailResult_WhenNameIsEmpty()
         {
-            var mapper = Common.GetMapper();
-            var context = Common.GetApplicationDbContext();
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
 
             // Arrange
             var createItemCommand = new CreateItemCommand { Name = string.Empty, Description = "test desc", Price = 1 };
@@ -68,8 +76,8 @@ namespace ItemsAndOrdersManagementSystem.Tests
         [Fact]
         public async Task Handel_Should_ReturnFailResult_WhenDescriptionIsEmpty()
         {
-            var mapper = Common.GetMapper();
-            var context = Common.GetApplicationDbContext();
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
 
             // Arrange
             var createItemCommand = new CreateItemCommand { Name = "test", Description = string.Empty, Price = 1 };
@@ -86,8 +94,8 @@ namespace ItemsAndOrdersManagementSystem.Tests
         [Fact]
         public async Task Handel_Should_ReturnFailResult_WhenDescriptionIsNull()
         {
-            var mapper = Common.GetMapper();
-            var context = Common.GetApplicationDbContext();
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
 
             // Arrange
             var createItemCommand = new CreateItemCommand { Name = "test", Description = null, Price = 1 };
@@ -104,8 +112,8 @@ namespace ItemsAndOrdersManagementSystem.Tests
         [Fact]
         public async Task Handel_Should_ReturnFailResult_WhenPriceIsZero()
         {
-            var mapper = Common.GetMapper();
-            var context = Common.GetApplicationDbContext();
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
 
             // Arrange
             var createItemCommand = new CreateItemCommand { Name = "test", Description = "test desc", Price = default(decimal) };
@@ -122,8 +130,8 @@ namespace ItemsAndOrdersManagementSystem.Tests
         [Fact]
         public async Task Handel_Should_ReturnFailResult_WhenPriceIsNegative()
         {
-            var mapper = Common.GetMapper();
-            var context = Common.GetApplicationDbContext();
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
 
             // Arrange
             var createItemCommand = new CreateItemCommand { Name = "test", Description = "test desc", Price = -1 };
@@ -140,8 +148,8 @@ namespace ItemsAndOrdersManagementSystem.Tests
         [Fact]
         public async Task Handel_Should_ReturnFailResult_WhenNoEnteredValues()
         {
-            var mapper = Common.GetMapper();
-            var context = Common.GetApplicationDbContext();
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
 
             // Arrange
             var createItemCommand = new CreateItemCommand { };

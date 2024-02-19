@@ -9,6 +9,7 @@ using ItemsAndOrdersManagementSystem.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -20,24 +21,24 @@ using Xunit;
 
 namespace ItemsAndOrdersManagementSystem.Tests
 {
-    public partial class Orders_Test
+    [Collection("TestCollection")]
+    public class Orders_Test : IClassFixture<TestFixture>
     {
+        private readonly TestFixture _testFixture;
+
+        public Orders_Test(TestFixture testFixture)
+        {
+            _testFixture = testFixture;
+        }
 
         [Fact]
         public async Task Handel_Should_ReturnSuccessResult_WhenCreateOrder()
         {
-            //var mapper = Common.GetMapper();
-            //var context = Common.GetApplicationDbContext();
-            //var httpContextAccessor = Common.GetHttpContextAccessor();
-            //await Common.CreateUsers(context);
-
-            var mapper = GetMapper();
-            var context = GetApplicationDbContext();
-            var httpContextAccessor = GetHttpContextAccessor();
-            await CreateUsers(context);
-
-
             // Arrange
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
+            var httpContextAccessor = _testFixture.HttpContextAccessor;
+
             var createItemCommand = new CreateItemCommand { Name = "test", Description = "test desc", Price = 1 };
             var createItemCommandHandler = new CreateItemCommandhandler(context, mapper);
             var createItemResult = await createItemCommandHandler.Handle(createItemCommand, default);
@@ -57,17 +58,11 @@ namespace ItemsAndOrdersManagementSystem.Tests
         [Fact]
         public async Task Handel_Should_ReturnFailResult_WhenUserIsNotCreated()
         {
-            //var mapper = Common.GetMapper();
-            //var context = Common.GetApplicationDbContext();
-            //var httpContextAccessor = Common.GetHttpContextAccessor();
-            //await Common.CreateUsers(context);
-
-            var mapper = GetMapper();
-            var context = GetApplicationDbContext();
-            var httpContextAccessor = GetHttpContextAccessor();
-            await CreateUsers(context);
-
             // Arrange
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
+            var httpContextAccessor = _testFixture.HttpContextAccessor;
+
             var createItemCommand = new CreateItemCommand { Name = "test", Description = "test desc", Price = 1 };
             var createItemCommandHandler = new CreateItemCommandhandler(context, mapper);
             var createItemResult = await createItemCommandHandler.Handle(createItemCommand, default);
@@ -87,17 +82,10 @@ namespace ItemsAndOrdersManagementSystem.Tests
         [Fact]
         public async Task Handel_Should_ReturnFailResult_WhenItemListIsEmpty()
         {
-            //var mapper = Common.GetMapper();
-            //var context = Common.GetApplicationDbContext();
-            //var httpContextAccessor = Common.GetHttpContextAccessor();
-            //await Common.CreateUsers(context);
-
-            var mapper = GetMapper();
-            var context = GetApplicationDbContext();
-            var httpContextAccessor = GetHttpContextAccessor();
-            await CreateUsers(context);
-
             // Arrange
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
+            var httpContextAccessor = _testFixture.HttpContextAccessor;
 
             var createOrderCommand = new CreateOrderCommand { UserId = "adminUserId", OrderItemsDtoList = new() { } };
             var createOrderCommandHandler = new CreateOrderCommandHandler(context, httpContextAccessor);
@@ -113,17 +101,11 @@ namespace ItemsAndOrdersManagementSystem.Tests
         [Fact]
         public async Task Handel_Should_ReturnFailResult_WhenItemNotFound()
         {
-            //var mapper = Common.GetMapper();
-            //var context = Common.GetApplicationDbContext();
-            //var httpContextAccessor = Common.GetHttpContextAccessor();
-            //await Common.CreateUsers(context);
-
-            var mapper = GetMapper();
-            var context = GetApplicationDbContext();
-            var httpContextAccessor = GetHttpContextAccessor();
-            await CreateUsers(context);
-
             // Arrange
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
+            var httpContextAccessor = _testFixture.HttpContextAccessor;
+
             var createItemCommand = new CreateItemCommand { Name = "test", Description = "test desc", Price = 1 };
             var createItemCommandHandler = new CreateItemCommandhandler(context, mapper);
             var createItemResult = await createItemCommandHandler.Handle(createItemCommand, default);
@@ -143,17 +125,11 @@ namespace ItemsAndOrdersManagementSystem.Tests
         [Fact]
         public async Task Handel_Should_ReturnFailResult_WhenItemIsDublicated()
         {
-            //var mapper = Common.GetMapper();
-            //var context = Common.GetApplicationDbContext();
-            //var httpContextAccessor = Common.GetHttpContextAccessor();
-            //await Common.CreateUsers(context);
-
-            var mapper = GetMapper();
-            var context = GetApplicationDbContext();
-            var httpContextAccessor = GetHttpContextAccessor();
-            await CreateUsers(context);
-
             // Arrange
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
+            var httpContextAccessor = _testFixture.HttpContextAccessor;
+
             var createItemCommand = new CreateItemCommand { Name = "test", Description = "test desc", Price = 1 };
             var createItemCommandHandler = new CreateItemCommandhandler(context, mapper);
             var createItemResult = await createItemCommandHandler.Handle(createItemCommand, default);
@@ -173,17 +149,11 @@ namespace ItemsAndOrdersManagementSystem.Tests
         [Fact]
         public async Task Handel_Should_ReturnFailResult_WhenLoggedUserIsNotInUsers()
         {
-            //var mapper = Common.GetMapper();
-            //var context = Common.GetApplicationDbContext();
-            //var httpContextAccessor = Common.GetHttpContextAccessor("invalidUserId");
-            //await Common.CreateUsers(context);
-
-            var mapper = GetMapper();
-            var context = GetApplicationDbContext();
-            var httpContextAccessor = GetHttpContextAccessor("InvalidUserId");
-            await CreateUsers(context);
-
             // Arrange
+            var mapper = _testFixture.Mapper;
+            var context = _testFixture.Context;
+            var httpContextAccessor = GetHttpContextAccessor("InvalidUserId");
+
             var createItemCommand = new CreateItemCommand { Name = "test", Description = "test desc", Price = 1 };
             var createItemCommandHandler = new CreateItemCommandhandler(context, mapper);
             var createItemResult = await createItemCommandHandler.Handle(createItemCommand, default);
@@ -200,32 +170,6 @@ namespace ItemsAndOrdersManagementSystem.Tests
             createOrderResult.Error.Should().Contain(Messages.userIsNotAuthenticated);
         }
 
-        [Before]
-        public void Setup()
-        {
-            // Code to run before every test
-        }
-
-        public IMapper GetMapper()
-        {
-            var config = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
-
-            return config.CreateMapper();
-        }
-
-        public TestDbContext GetApplicationDbContext()
-        {
-            var options = new DbContextOptionsBuilder<TestDbContext>()
-                    .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                    .Options;
-
-            var res = new TestDbContext(options);
-
-            res.Database.EnsureDeleted();
-
-            return res;
-        }
-
         public IHttpContextAccessor GetHttpContextAccessor(string loggedUserId = "adminUserId")
         {
             var httpContextAccessorMock = new Mock<IHttpContextAccessor>(MockBehavior.Strict);
@@ -240,59 +184,13 @@ namespace ItemsAndOrdersManagementSystem.Tests
 
             return httpContextAccessorMock.Object;
         }
+    }
 
-        public async Task CreateUsers(TestDbContext context)
-        {
-            var userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            Mock.Of<IUserStore<ApplicationUser>>(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null);
-
-            userManagerMock.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
-                .ReturnsAsync(IdentityResult.Success);
-
-            var email_Admin = "admin@admin.com";
-            var email_User = "user@user.com";
-
-            var addedUserList = new List<ApplicationUser>();
-
-            if (await userManagerMock.Object.FindByNameAsync(email_Admin) == null)
-            {
-                var user_Admin = new ApplicationUser()
-                {
-                    Id = "adminUserId",
-                    SecurityStamp = Guid.NewGuid().ToString(),
-                    UserName = email_Admin,
-                    Email = email_Admin
-                };
-                await userManagerMock.Object.CreateAsync(user_Admin, "123");
-                addedUserList.Add(user_Admin);
-            }
-
-            if (await userManagerMock.Object.FindByNameAsync(email_User) == null)
-            {
-                var user_User = new ApplicationUser()
-                {
-                    Id = "userUserId",
-                    SecurityStamp = Guid.NewGuid().ToString(),
-                    UserName = email_User,
-                    Email = email_User
-                };
-                await userManagerMock.Object.CreateAsync(user_User, "123");
-                addedUserList.Add(user_User);
-            }
-
-            if (addedUserList.Count > default(int))
-            {
-                context.ApplicationUsers.AddRange(addedUserList);
-                await context.SaveChangesAsync();
-            }
-        }
+    [CollectionDefinition("TestCollection")]
+    public class TestCollection : ICollectionFixture<TestFixture>
+    {
+        // This class has no code, and is never created. Its purpose is simply
+        // to be the place to apply [CollectionDefinition] and all the
+        // ICollectionFixture<> interfaces.
     }
 }
