@@ -25,7 +25,7 @@ namespace ItemsAndOrdersManagementSystem.Models
         public string UserId { get; private set; } = null!;
 
         [Timestamp]
-        public byte[] Timestamp { get; private set; }
+        public byte[]? Timestamp { get; private set; }
 
         public ApplicationUser User { get; set; }
         public List<OrderItems> Items { get; set; } = new();
@@ -68,14 +68,14 @@ namespace ItemsAndOrdersManagementSystem.Models
             if (orderDto.OrderItemList.Any(x => x.HasNoValue))
                 err = err.ErrorAppendMessage(Messages.OrderItemNotFound);
 
-            if (orderDto.OrderItemList.GroupBy(x => x.Value.Id).Any(x => x.Count() > 1))
-                return Result.Failure<int>(err.ErrorAppendMessage(Messages.TheItemIsDublicated));
+            if (!orderDto.OrderItemList.Any(x => x.HasNoValue) && orderDto.OrderItemList.GroupBy(x => x.Value.Id).Any(x => x.Count() > 1))
+                err = err.ErrorAppendMessage(Messages.TheItemIsDublicated);
 
             if (orderDto.HttpUser is null || orderDto.HttpUser.FindFirstValue(ClaimTypes.NameIdentifier) != orderDto.MaybeUser.Value.Id)
-                return Result.Failure<int>(err.ErrorAppendMessage(Messages.userIsNotAuthenticated));
+                err = err.ErrorAppendMessage(Messages.userIsNotAuthenticated);
 
             if (!string.IsNullOrEmpty(err))
-                return Result.Failure<Order>(err);
+                return Result.Failure(err);
             else
                 return Result.Success();
         }

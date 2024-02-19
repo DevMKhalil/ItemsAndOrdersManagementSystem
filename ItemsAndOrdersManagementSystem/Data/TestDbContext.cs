@@ -6,12 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ItemsAndOrdersManagementSystem.Data
 {
-    public class AppDbContext : IdentityDbContext<ApplicationUser>, IAppDbContext
+    public class TestDbContext : IdentityDbContext<ApplicationUser>, IAppDbContext
     {
-        private readonly IConfiguration _configuration;
-        public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration configuration) : base(options) 
+        public TestDbContext(DbContextOptions<TestDbContext> options) : base(options)
         {
-            _configuration = configuration;
         }
 
         public DbSet<Order> Orders { get; set; }
@@ -35,9 +33,5 @@ namespace ItemsAndOrdersManagementSystem.Data
                 return Result.Failure(ex.Message);
             }
         }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    => optionsBuilder
-        .UseSqlServer(_configuration.GetConnectionString("DefaultConnection"), o => o.UseCompatibilityLevel(120));
     }
 }

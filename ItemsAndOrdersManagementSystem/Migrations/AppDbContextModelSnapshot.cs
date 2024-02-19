@@ -121,7 +121,7 @@ namespace ItemsAndOrdersManagementSystem.Migrations
 
                     b.Property<byte[]>("Timestamp")
                         .IsConcurrencyToken()
-                        .IsRequired()
+                        //.IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
