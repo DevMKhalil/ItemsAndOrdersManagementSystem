@@ -10,6 +10,13 @@
 <p>
     <a asp-page="Create">Create New</a>
 </p>
+<form method="get">
+    <div class="form-group">
+        <label for="itemName">Filter by Name:</label>
+        <input type="text" class="form-control" id="itemName" name="itemName" value="@Model.FilterItemName" />
+    </div>
+    <button type="submit" class="btn btn-primary">Apply Filter</button>
+</form>
 <table class="table">
     <thead>
         <tr>
@@ -46,3 +53,17 @@
 }
     </tbody>
 </table>
+<div class="row">
+    <div class="col-sm-12">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                @for (var i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        <a class="page-link" asp-page="./Index" asp-route-itemName="@Model.FilterItemName" asp-route-pageIndex="@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
+</div>

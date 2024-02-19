@@ -11,6 +11,7 @@ using ItemsAndOrdersManagementSystem.Aplication.Items.Dtos;
 using ItemsAndOrdersManagementSystem.Aplication.Items.Queries.GetById;
 using MediatR;
 using ItemsAndOrdersManagementSystem.Aplication.Items.Queries.GetList;
+using ItemsAndOrdersManagementSystem.Aplication.Items.Queries.SearchQuery;
 
 namespace ItemsAndOrdersManagementSystem.Pages.Items
 {
@@ -24,10 +25,26 @@ namespace ItemsAndOrdersManagementSystem.Pages.Items
         }
 
         public IList<ItemDto> ItemList { get;set; } = default!;
+        public string FilterItemName { get; set; }
+        public int PageIndex { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public const int ItemsPerPage = 5;
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(string? itemName, int? pageIndex)
         {
-            ItemList = await _mediator.Send(new GetItemListQuery { });
+            FilterItemName = itemName ?? string.Empty;
+
+            PageIndex = pageIndex ?? 1;
+
+            var result = await _mediator.Send(new SearchQuery
+                                {
+                                    Name = FilterItemName,
+                                    Skip = (PageIndex - 1) * ItemsPerPage,
+                                    Take = ItemsPerPage
+                                });
+
+            TotalPages = (int)Math.Ceiling((double)result.TotalCount / ItemsPerPage);
+            ItemList = result.Data;
         }
     }
 }
