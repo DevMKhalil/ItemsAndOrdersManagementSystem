@@ -29,7 +29,7 @@ namespace ItemsAndOrdersManagementSystem.Common.Helper
             if (string.IsNullOrEmpty(message))
                 return $"&&{newMessage}";
             else
-                return $"&&{newMessage}";
+                return $"{message}&&{newMessage}";
         }
 
         public static ModelStateDictionary AddErrors(this ModelStateDictionary modelStateDictionary,string message)

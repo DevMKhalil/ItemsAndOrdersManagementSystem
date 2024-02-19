@@ -61,6 +61,15 @@ namespace ItemsAndOrdersManagementSystem.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can Only Update The Order By The Owner User.
+        /// </summary>
+        public static string CanOnlyUpdateTheOrderByTheOwnerUser {
+            get {
+                return ResourceManager.GetString("CanOnlyUpdateTheOrderByTheOwnerUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please Insert Item Description.
         /// </summary>
         public static string InsertItemDesc {

@@ -14,7 +14,6 @@ namespace ItemsAndOrdersManagementSystem.Aplication.Orders.Commands.UpdateOrder
     {
         public int id { get; set; }
         public string UserId { get; set; } = null!;
-        public byte[] Timestamp { get; }
         public List<int> OrderItemsDtoList { get; set; } = new();
     }
 
@@ -40,9 +39,14 @@ namespace ItemsAndOrdersManagementSystem.Aplication.Orders.Commands.UpdateOrder
             if (maybeOrder.HasNoValue)
                 return Result.Failure<int>(err.ErrorAppendMessage(Messages.OrderNotFound));
 
-            Maybe<ApplicationUser> maybeUser = await _dbContext.ApplicationUsers.FindAsync(request.UserId, cancellationToken);
+            Maybe<ApplicationUser> maybeRequestUser = await _dbContext.ApplicationUsers.FindAsync(request.UserId, cancellationToken);
 
-            if (maybeUser.HasNoValue)
+            if (maybeRequestUser.HasNoValue)
+                return Result.Failure<int>(err.ErrorAppendMessage(Messages.UserNotFound));
+
+            Maybe<ApplicationUser> maybeOrderUser = await _dbContext.ApplicationUsers.FindAsync(maybeOrder.Value.UserId, cancellationToken);
+
+            if (maybeOrderUser.HasNoValue)
                 return Result.Failure<int>(err.ErrorAppendMessage(Messages.UserNotFound));
 
             List<Item> itemList = await _dbContext.Items.Where(x => request.OrderItemsDtoList.Contains(x.Id)).ToListAsync();
@@ -57,7 +61,8 @@ namespace ItemsAndOrdersManagementSystem.Aplication.Orders.Commands.UpdateOrder
 
             OrderDto orderDto = new()
             {
-                MaybeUser = maybeUser,
+                MaybeRequestUser = maybeRequestUser,
+                MaybeOrderUser = maybeOrderUser,
                 HttpUser = _httpContextAccessor.HttpContext.User,
                 OrderItemList = orderItemList
             };

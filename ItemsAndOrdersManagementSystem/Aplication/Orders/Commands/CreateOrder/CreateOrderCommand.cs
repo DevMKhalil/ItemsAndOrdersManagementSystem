@@ -49,7 +49,8 @@ namespace ItemsAndOrdersManagementSystem.Aplication.Orders.Commands.CreateOrder
 
             OrderDto orderDto = new()
             {
-                MaybeUser = maybeUser,
+                MaybeRequestUser = maybeUser,
+                MaybeOrderUser = maybeUser,
                 HttpUser = _httpContextAccessor.HttpContext.User,
                 OrderItemList = orderItemList
             };

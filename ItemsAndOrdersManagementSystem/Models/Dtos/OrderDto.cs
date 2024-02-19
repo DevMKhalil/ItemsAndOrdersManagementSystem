@@ -7,15 +7,11 @@ using System.Security.Claims;
 
 namespace ItemsAndOrdersManagementSystem.Models.Dtos
 {
-    public record OrderDto //: IMapFrom<CreateOrderCommand>, IMapFrom<UpdateOrderCommand>
+    public record OrderDto
     {
-        public Maybe<ApplicationUser> MaybeUser { get; set; } = null!;
+        public Maybe<ApplicationUser> MaybeRequestUser { get; set; } = null!;
+        public Maybe<ApplicationUser> MaybeOrderUser { get; set; } = null!;
         public ClaimsPrincipal HttpUser { get; set; } = null!;
         public List<Maybe<Item>> OrderItemList { get; set; } = new();
-        //public void Mapping(Profile profile)
-        //{
-        //    profile.CreateMap<CreateOrderCommand, OrderDto>();
-        //    profile.CreateMap<UpdateOrderCommand, OrderDto>();
-        //}
     }
 }

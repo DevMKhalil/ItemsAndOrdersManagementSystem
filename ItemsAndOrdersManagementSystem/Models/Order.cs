@@ -50,7 +50,7 @@ namespace ItemsAndOrdersManagementSystem.Models
 
             return new Order()
             {
-                UserId = orderDto.MaybeUser.Value.Id,
+                UserId = orderDto.MaybeRequestUser.Value.Id,
                 Items = items
             };
         }
@@ -59,7 +59,7 @@ namespace ItemsAndOrdersManagementSystem.Models
         {
             string err = string.Empty;
 
-            if (orderDto.MaybeUser.HasNoValue)
+            if (orderDto.MaybeRequestUser.HasNoValue)
                 err = err.ErrorAppendMessage(nameof(Order), nameof(UserId), Messages.userIsNotAuthenticated);
 
             if (orderDto.OrderItemList.Count <= default(int))
@@ -71,7 +71,10 @@ namespace ItemsAndOrdersManagementSystem.Models
             if (!orderDto.OrderItemList.Any(x => x.HasNoValue) && orderDto.OrderItemList.GroupBy(x => x.Value.Id).Any(x => x.Count() > 1))
                 err = err.ErrorAppendMessage(Messages.TheItemIsDublicated);
 
-            if (orderDto.HttpUser is null || orderDto.HttpUser.FindFirstValue(ClaimTypes.NameIdentifier) != orderDto.MaybeUser.Value.Id)
+            if (orderDto.MaybeOrderUser.Value.Id != orderDto.MaybeRequestUser.Value.Id)
+                err = err.ErrorAppendMessage(Messages.CanOnlyUpdateTheOrderByTheOwnerUser);
+
+            if (orderDto.HttpUser is null || orderDto.HttpUser.FindFirstValue(ClaimTypes.NameIdentifier) != orderDto.MaybeRequestUser.Value.Id)
                 err = err.ErrorAppendMessage(Messages.userIsNotAuthenticated);
 
             if (!string.IsNullOrEmpty(err))
@@ -99,7 +102,7 @@ namespace ItemsAndOrdersManagementSystem.Models
                     this.Items.Add(orderItemsResult.Value);
             }
 
-            this.UserId = orderDto.MaybeUser.Value.Id;
+            this.UserId = orderDto.MaybeRequestUser.Value.Id;
 
             return Result.Success(this);
         }

@@ -130,4 +130,7 @@
   <data name="TheItemIsDublicated" xml:space="preserve">
     <value>The Item Is Dublicated</value>
   </data>
+  <data name="CanOnlyUpdateTheOrderByTheOwnerUser" xml:space="preserve">
+    <value>Can Only Update The Order By The Owner User</value>
+  </data>
 </root>
